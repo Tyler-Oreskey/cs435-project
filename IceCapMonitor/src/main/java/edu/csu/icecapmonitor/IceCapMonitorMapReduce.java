@@ -26,6 +26,7 @@ public class IceCapMonitorMapReduce extends Configured implements Tool {
         job1.setMapOutputValueClass(Text.class);
         job1.setOutputKeyClass(Text.class);
         job1.setOutputValueClass(Text.class);
+        job1.setInputFormatClass(TarInputFormat.class);
 
         FileInputFormat.addInputPath(job1, new Path(inputDir));
         FileOutputFormat.setOutputPath(job1, new Path(outputDir));
