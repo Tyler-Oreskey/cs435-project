@@ -8,6 +8,9 @@ import org.apache.hadoop.io.Text;
 import java.io.IOException;
 
 public class NDSIMapReduce {
+    public double normalizeDifference(double bandFour, double bandSix){
+       return ((bandFour - bandSix) / (bandFour + bandSix));
+    }
     public static class NDSIMapper extends Mapper<LongWritable, Text, Text, Text> {
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             // mapper code here
