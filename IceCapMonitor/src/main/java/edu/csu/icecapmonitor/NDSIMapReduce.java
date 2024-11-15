@@ -11,6 +11,10 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
+import java.io.ByteArrayInputStream;
 
 public class NDSIMapReduce {
     public double normalizeDifference(double bandFour, double bandSix){
