@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.hadoop.io.DoubleWritable;
 
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -20,7 +21,8 @@ public class NDSIMapReduce {
     public static double normalizeDifference(double bandFour, double bandSix){
        return ((bandFour - bandSix) / (bandFour + bandSix));
     }
-    public static class NDSIMapper extends Mapper<LongWritable, Text, Text, Text> {
+    public static class NDSIMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+        private final DoubleWritable ndsiValue = new DoubleWritable();
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             String tarFilePathStr = value.toString();
             Path tarFilePath = new Path(tarFilePathStr);
@@ -64,7 +66,8 @@ public class NDSIMapReduce {
                             double ndsi = normalizeDifference(bandFour, bandSix);
 
                             // Output NDSI value for each pixel or region
-                            context.write(new Text(tarFilePath.getName()), new Text(x + "," + y + "=" + ndsi)); // change this to double
+                            ndsiValue.set(ndsi);
+                            context.write(new Text(tarFilePath.getName()), ndsiValue); // change this to double
                         }
                     }
                 }
