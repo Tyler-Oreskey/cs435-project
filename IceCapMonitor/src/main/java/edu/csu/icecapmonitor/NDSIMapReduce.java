@@ -75,9 +75,21 @@ public class NDSIMapReduce {
         }
     }
 
-    public static class NDSIReducer extends Reducer<Text, Text, Text, Text> {
-        public void reduce(Text key, Iterable<Text> values, Context context)  throws IOException, InterruptedException {
+    public static class NDSIReducer extends Reducer<Text, Text, Text, DoubleWritable> {
+        public void reduce(Text key, Iterable<Double> values, Context context)  throws IOException, InterruptedException {
             // reducer code here
+
+            double counterOfNIDSIValues = 0;
+            double totalOfNDSIValues = 0;
+
+            for(Double val : values){
+                counterOfNIDSIValues++;
+                totalOfNDSIValues = totalOfNDSIValues + val;
+            }
+            
+            double avergeNDSIValue = totalOfNDSIValues / counterOfNIDSIValues;
+
+            context.write(new Text(key), new DoubleWritable(avergeNDSIValue));
         }
     }
 

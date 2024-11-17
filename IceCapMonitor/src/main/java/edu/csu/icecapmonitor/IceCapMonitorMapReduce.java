@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 
 import org.apache.hadoop.util.Tool;
@@ -25,7 +26,7 @@ public class IceCapMonitorMapReduce extends Configured implements Tool {
         job1.setMapOutputKeyClass(Text.class);
         job1.setMapOutputValueClass(Text.class);
         job1.setOutputKeyClass(Text.class);
-        job1.setOutputValueClass(Text.class);
+        job1.setOutputValueClass(DoubleWritable.class);
         job1.setInputFormatClass(TarInputFormat.class);
 
         FileInputFormat.addInputPath(job1, new Path(inputDir));
