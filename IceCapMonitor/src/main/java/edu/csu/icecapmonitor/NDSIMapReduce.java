@@ -38,11 +38,9 @@ public class NDSIMapReduce {
                 while ((entry = tarInput.getNextTarEntry()) != null) {
                     String entryName = entry.getName();
                     if (entryName.endsWith("T2_B4.TIF")) {
-                        band4Data = new byte[(int) entry.getSize()];
-                        tarInput.read(band4Data);
+                        band4Data = tarInput.readAllBytes();
                     } else if (entryName.endsWith("T2_B6.TIF")) {
-                        band6Data = new byte[(int) entry.getSize()];
-                        tarInput.read(band6Data);
+                        band6Data = tarInput.readAllBytes();
                     }
                     if (band4Data != null && band6Data != null) break;
                 }
@@ -75,7 +73,7 @@ public class NDSIMapReduce {
         }
     }
 
-    public static class NDSIReducer extends Reducer<Text, Text, Text, DoubleWritable> {
+    public static class NDSIReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
         public void reduce(Text key, Iterable<Double> values, Context context)  throws IOException, InterruptedException {
             // reducer code here
 
