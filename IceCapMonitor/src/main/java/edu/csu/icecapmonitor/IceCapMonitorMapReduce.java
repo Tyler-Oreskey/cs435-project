@@ -22,12 +22,12 @@ public class IceCapMonitorMapReduce extends Configured implements Tool {
         Job job1 = Job.getInstance(conf, "Normalized Difference Snow Index Job");
         job1.setJarByClass(NDSIMapReduce.class);
         job1.setMapperClass(NDSIMapReduce.NDSIMapper.class);
-        job1.setReducerClass(NDSIMapReduce.NDSIReducer.class);
         job1.setMapOutputKeyClass(Text.class);
         job1.setMapOutputValueClass(DoubleWritable.class);
         job1.setOutputKeyClass(Text.class);
-        job1.setOutputValueClass(DoubleWritable.class);
+        job1.setOutputValueClass(Text.class);
         job1.setInputFormatClass(TarInputFormat.class);
+        job1.setNumReduceTasks(0);
 
         FileInputFormat.addInputPath(job1, new Path(inputDir));
         FileOutputFormat.setOutputPath(job1, new Path(outputDir));
