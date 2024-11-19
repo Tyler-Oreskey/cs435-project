@@ -1,7 +1,6 @@
 package edu.csu.icecapmonitor;
 
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.fs.Path;
@@ -9,7 +8,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.hadoop.io.DoubleWritable;
 
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -18,11 +16,25 @@ import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
 
 public class NDSIMapReduce {
-    public static double normalizeDifference(double bandFour, double bandSix){
-       return ((bandFour - bandSix) / (bandFour + bandSix));
+    public static double normalizeDifference(double bandFour, double bandSix) {
+        return ((bandFour - bandSix) / (bandFour + bandSix));
     }
-    public static class NDSIMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
-        private final DoubleWritable ndsiValue = new DoubleWritable();
+
+    public static int categorizeNDSI(double ndsi) {
+        if (ndsi < 0.2) {
+            return 0; // Category 1
+        } else if (ndsi >= 0.2 && ndsi < 0.4) {
+            return 1; // Category 2
+        } else if (ndsi >= 0.4 && ndsi < 0.6) {
+            return 2; // Category 3
+        } else if (ndsi >= 0.6 && ndsi < 0.8) {
+            return 3; // Category 4
+        } else {
+            return 4; // Category 5
+        }
+    }
+
+    public static class NDSIMapper extends Mapper<LongWritable, Text, Text, Text> {
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             String tarFilePathStr = value.toString();
             Path tarFilePath = new Path(tarFilePathStr);
@@ -31,8 +43,8 @@ public class NDSIMapReduce {
             byte[] band4Data = null;
             byte[] band6Data = null;
 
-            try(FSDataInputStream fileIn = fs.open(tarFilePath);
-                TarArchiveInputStream tarInput = new TarArchiveInputStream(fileIn)) {
+            try (FSDataInputStream fileIn = fs.open(tarFilePath);
+                    TarArchiveInputStream tarInput = new TarArchiveInputStream(fileIn)) {
                 TarArchiveEntry entry;
 
                 while ((entry = tarInput.getNextTarEntry()) != null) {
@@ -42,7 +54,8 @@ public class NDSIMapReduce {
                     } else if (entryName.endsWith("T2_B6.TIF")) {
                         band6Data = tarInput.readAllBytes();
                     }
-                    if (band4Data != null && band6Data != null) break;
+                    if (band4Data != null && band6Data != null)
+                        break;
                 }
             }
 
@@ -57,38 +70,23 @@ public class NDSIMapReduce {
                     int width = band4Raster.getWidth();
                     int height = band4Raster.getHeight();
 
+                    long[] categoryCounts = new long[5];
+
                     for (int y = 0; y < height; y++) {
                         for (int x = 0; x < width; x++) {
                             double bandFour = band4Raster.getSampleDouble(x, y, 0);
                             double bandSix = band6Raster.getSampleDouble(x, y, 0);
                             double ndsi = normalizeDifference(bandFour, bandSix);
 
-                            // Output NDSI value for each pixel or region
-                            ndsiValue.set(ndsi);
-                            context.write(new Text(tarFilePath.getName()), ndsiValue); // change this to double
+                            categoryCounts[categorizeNDSI(ndsi)]++;
                         }
+                    }
+
+                    for (int i = 0; i < categoryCounts.length; i++) {
+                        context.write(new Text(tarFilePath.getName()), new Text(i + "," + categoryCounts[i]));
                     }
                 }
             }
         }
     }
-
-    public static class NDSIReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
-        public void reduce(Text key, Iterable<Double> values, Context context)  throws IOException, InterruptedException {
-            // reducer code here
-
-            double counterOfNIDSIValues = 0;
-            double totalOfNDSIValues = 0;
-
-            for(Double val : values){
-                counterOfNIDSIValues++;
-                totalOfNDSIValues = totalOfNDSIValues + val;
-            }
-            
-            double avergeNDSIValue = totalOfNDSIValues / counterOfNIDSIValues;
-
-            context.write(new Text(key), new DoubleWritable(avergeNDSIValue));
-        }
-    }
-
 }
