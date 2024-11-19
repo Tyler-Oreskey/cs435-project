@@ -24,7 +24,7 @@ public class IceCapMonitorMapReduce extends Configured implements Tool {
         job1.setMapperClass(NDSIMapReduce.NDSIMapper.class);
         job1.setReducerClass(NDSIMapReduce.NDSIReducer.class);
         job1.setMapOutputKeyClass(Text.class);
-        job1.setMapOutputValueClass(Text.class);
+        job1.setMapOutputValueClass(DoubleWritable.class);
         job1.setOutputKeyClass(Text.class);
         job1.setOutputValueClass(DoubleWritable.class);
         job1.setInputFormatClass(TarInputFormat.class);
