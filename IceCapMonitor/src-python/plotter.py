@@ -24,7 +24,7 @@ def read_from_hdfs() -> pd.DataFrame:
         date = datetime.strptime(landsat["date"], "%Y%m%d").date().isoformat()
         data["file"].append(file)
         data["category"].append(CATEGORIES.get(int(category)))
-        data["count"].append(int(count) * (30 * 30) * 0.001)
+        data["count"].append(int(count) * 0.0009)
         data["date"].append(date)
     
     
@@ -33,7 +33,8 @@ def read_from_hdfs() -> pd.DataFrame:
 if __name__ == "__main__":
     df = read_from_hdfs()
 
-    fig = px.bar(df, x="date", y="count", color="category", title="NDSI Values from Remote Region of Iceland", labels={"category": "NDSI Category"}, color_discrete_sequence=["#000000", "#333333", "#1a2653", "#006bce", "#b4cffa"])
+    fig = px.bar(df, x="date", y="count", color="category", title="NDSI Values from Remote Region of Iceland", labels={"category": "NDSI Category"}, color_discrete_sequence=["#000000", "#333333", "#1a2653", "#006bce", "#b4cffa"], category_orders={"date": sorted(df.date)})
     fig.update_layout(xaxis_type='category', xaxis_title="Aquisition Date", yaxis_title="Area (km<sup>2</sup>)")
-    fig.write_image("out.png", scale=6)
+    fig.write_image("ndsi-chart.png", scale=6)
+    fig.write_html("ndsi-chart.html")
 
