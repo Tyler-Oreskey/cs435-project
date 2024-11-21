@@ -19,20 +19,20 @@ public class IceCapMonitorMapReduce extends Configured implements Tool {
     }
 
     public static int runJob(Configuration conf, String inputDir, String outputDir) throws Exception {
-        Job job1 = Job.getInstance(conf, "Normalized Difference Snow Index Job");
-        job1.setJarByClass(NDSIMapReduce.class);
-        job1.setMapperClass(NDSIMapReduce.NDSIMapper.class);
-        job1.setMapOutputKeyClass(Text.class);
-        job1.setMapOutputValueClass(DoubleWritable.class);
-        job1.setOutputKeyClass(Text.class);
-        job1.setOutputValueClass(Text.class);
-        job1.setInputFormatClass(TarInputFormat.class);
-        job1.setNumReduceTasks(0);
+        Job ndsi_job = Job.getInstance(conf, "Normalized Difference Snow Index Job");
+        ndsi_job.setJarByClass(NDSIMapReduce.class);
+        ndsi_job.setMapperClass(NDSIMapReduce.NDSIMapper.class);
+        ndsi_job.setMapOutputKeyClass(Text.class);
+        ndsi_job.setMapOutputValueClass(DoubleWritable.class);
+        ndsi_job.setOutputKeyClass(Text.class);
+        ndsi_job.setOutputValueClass(Text.class);
+        ndsi_job.setInputFormatClass(TarInputFormat.class);
+        ndsi_job.setNumReduceTasks(0);
 
-        FileInputFormat.addInputPath(job1, new Path(inputDir));
-        FileOutputFormat.setOutputPath(job1, new Path(outputDir));
+        FileInputFormat.addInputPath(ndsi_job, new Path(inputDir));
+        FileOutputFormat.setOutputPath(ndsi_job, new Path(outputDir));
 
-        return job1.waitForCompletion(true) ? 0 : 1;
+        return ndsi_job.waitForCompletion(true) ? 0 : 1;
     }
 
     @Override

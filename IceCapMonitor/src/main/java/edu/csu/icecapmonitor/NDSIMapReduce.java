@@ -43,6 +43,7 @@ public class NDSIMapReduce {
             byte[] band4Data = null;
             byte[] band6Data = null;
 
+            // Iterate through tar file and read data for Bands 4 and 6
             try (FSDataInputStream fileIn = fs.open(tarFilePath);
                     TarArchiveInputStream tarInput = new TarArchiveInputStream(fileIn)) {
                 TarArchiveEntry entry;
@@ -72,16 +73,19 @@ public class NDSIMapReduce {
 
                     long[] categoryCounts = new long[5];
 
+                    // Calculate NDSI for every pixel in the band files
                     for (int y = 0; y < height; y++) {
                         for (int x = 0; x < width; x++) {
                             double bandFour = band4Raster.getSampleDouble(x, y, 0);
                             double bandSix = band6Raster.getSampleDouble(x, y, 0);
                             double ndsi = normalizeDifference(bandFour, bandSix);
 
+                            // Increment pixel count for category
                             categoryCounts[categorizeNDSI(ndsi)]++;
                         }
                     }
 
+                    // Write pixel counts to context with category
                     for (int i = 0; i < categoryCounts.length; i++) {
                         context.write(new Text(tarFilePath.getName()), new Text(i + "," + categoryCounts[i]));
                     }
