@@ -9,7 +9,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 
@@ -20,19 +19,19 @@ import java.util.List;
 public class TarInputFormat extends InputFormat<LongWritable, Text> {
 
     @Override
-    public RecordReader<LongWritable, Text> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
+    public RecordReader<LongWritable, Text> createRecordReader(InputSplit split, TaskAttemptContext context)
+            throws IOException, InterruptedException {
         return new TarRecordReader();
     }
 
     @Override
     public List getSplits(JobContext context) throws IOException {
-        // In this simple example, each .tar file is treated as a single split.
-        // In a more advanced implementation, you could split large .tar files into smaller pieces.
         List<FileSplit> splits = new ArrayList<>();
         FileSystem fs = FileSystem.get(context.getConfiguration());
-        Path inputDir = new Path(context.getConfiguration().get("mapred.input.dir"));
+        Path inputDir = new Path(context.getConfiguration().get("mapreduce.input.fileinputformat.inputdir"));
         FileStatus[] fileStatuses = fs.listStatus(inputDir);
 
+        // Add each tar file from input directory to input splits
         for (FileStatus fileStatus : fileStatuses) {
             if (fileStatus.isFile() && fileStatus.getPath().toString().endsWith(".tar")) {
                 splits.add(new FileSplit(fileStatus.getPath(), 0, fileStatus.getLen(), null));

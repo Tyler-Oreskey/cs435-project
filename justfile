@@ -31,3 +31,7 @@ yarn_sample: compile cleanup
 # Compile and run full dataset using yarn
 yarn_full: compile cleanup
     hadoop jar IceCapMonitor/target/*.jar edu.csu.icecapmonitor.IceCapMonitorMapReduce -D mapreduce.framework.name=yarn /IceCapMonitor/input/Full_Dataset /IceCapMonitor/output
+
+tar:
+    tar -cvf team_1.tar IceCapMonitor/src IceCapMonitor/.gitignore IceCapMonitor/pom.xml IceCapMonitor/ndsi-chart.* README.md justfile
+    
